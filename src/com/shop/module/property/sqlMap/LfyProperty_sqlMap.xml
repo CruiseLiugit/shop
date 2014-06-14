@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.shop.module.property.dao.mapper.LfyPropertyMapper">
+<!-- 角色 -->
+  <resultMap type="LfyProperty" id="LfyPropertyMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="property_code" jdbcType="VARCHAR" property="propertyCode" />
+    <result column="property_name" jdbcType="VARCHAR" property="propertyName" />
+    <result column="property_type" jdbcType="VARCHAR" property="propertyType" />
+    <result column="property_order" jdbcType="INTEGER" property="propertyOrder" />
+    <result column="show_name" jdbcType="VARCHAR" property="showName" />   
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="choose_status" jdbcType="VARCHAR" property="chooseStatus" />
+    <result column="create_date" jdbcType="DATE" property="createDate" />
+    <result column="create_opid" jdbcType="VARCHAR" property="createOpid" />
+  </resultMap>
+  	
+  	<!-- 插入属性 -->
+  	<insert id="insertProperty" parameterType="LfyProperty">
+  		insert into lfy_property(property_code,property_name,property_type,property_order,show_name,status,choose_status,create_date,create_opid)
+  		values(#{propertyCode,jdbcType=VARCHAR},#{propertyName,jdbcType=VARCHAR},#{propertyType,jdbcType=VARCHAR},
+  		#{propertyOrder,jdbcType=INTEGER},#{showName,jdbcType=VARCHAR},#{status,jdbcType=VARCHAR},#{chooseStatus,jdbcType=VARCHAR},sysdate(),#{createOpid,jdbcType=VARCHAR})
+  	</insert>
+  	
+  	<!-- 更新属性 -->
+  	<update id="updateProperty" parameterType="LfyProperty">
+  		update lfy_property
+  		<set>
+  			<if test="propertyName!=null">property_name=#{propertyName,jdbcType=VARCHAR},</if>
+  			<if test="propertyType!=null">property_type=#{propertyType,jdbcType=VARCHAR},</if>
+  			<if test="propertyOrder!=null">property_order=#{propertyOrder,jdbcType=INTEGER},</if>
+  			<if test="showName!=null">show_name=#{showName,jdbcType=VARCHAR},</if>
+  			<if test="status!=null">status=#{status,jdbcType=VARCHAR},</if>
+  			<if test="chooseStatus!=null">choose_status=#{chooseStatus,jdbcType=VARCHAR}</if>
+  		</set>
+  		where property_code=#{propertyCode,jdbcType=VARCHAR}
+  	</update>
+  	
+  	<!-- 删除属性 -->
+  	<delete id="deletePropertyByCode" parameterType="String">
+  		delete from lfy_property where property_code=#{propertyCode,jdbcType=VARCHAR} 
+  	</delete>
+  	
+  	<!-- 通过code查找属性 -->
+  	<select id="findPropertyByCode" parameterType="String" resultMap="LfyPropertyMap">
+  		select * from lfy_property where property_code=#{propertyCode,jdbcType=VARCHAR} 
+  	</select>
+  	
+  	<!--查找一定条件下的属性 -->
+  	<select id="findPropertys" parameterType="java.util.HashMap" resultMap="LfyPropertyMap">
+  		select * from lfy_property
+  		where 1=1
+  		<if test="propertyName!=null and propertyName!=''">and property_name  like concat('%',concat(#{propertyName},'%'))</if>
+  		<if test="status!=null">and status=#{status,jdbcType=VARCHAR}</if>
+  		order by property_order
+  	</select>
+  	
+  	<!-- 查找一定条件下属性数量 -->
+  	<select id="findPropertys_count" parameterType="java.util.HashMap" resultType="int">
+  		select count(1) from lfy_property
+  		where 1=1
+  		<if test="propertyName!=null and propertyName!=''">and property_name  like concat('%',concat(#{propertyName},'%'))</if>
+  		<if test="status!=null">and status=#{status,jdbcType=VARCHAR}</if>	
+  	</select>
+  	
+  	<!-- 查询类目拥有的属性 -->
+  	<select id="findPropertysByCategoryCode" parameterType="String" resultMap="LfyPropertyMap">
+  		select lp.* from lfy_property lp,lfy_categoryproperty lcp 
+  		where lp.property_code=lcp.property_code and lcp.category_code=#{categoryCode,jdbcType=VARCHAR} and lcp.status='1' and lp.status='1'
+  	</select>
+  	
+  	<!-- 查看该属性被类目使用次数，用于判断是否可以删除 -->
+  	<select id="findPropertyUserCount" parameterType="String" resultType="int">
+  		select count(1) from lfy_categoryproperty 
+  		where property_code=#{propertyCode,jdbcType=VARCHAR} and status='1'
+  	</select>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+<mapper namespace="com.shop.module.privilege.dao.mapper.UserRoleMapper">
+  <resultMap type="UserRole" id="UserRoleMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />   
+    <result column="USER_CODE" jdbcType="VARCHAR" property="userCode" />
+    <result column="ROLE_CODE" jdbcType="VARCHAR" property="roleCode" />
+    <result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+    <result column="CREATE_OPID" jdbcType="VARCHAR" property="createOpid" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+  </resultMap>
+  
+  <select id="queryUsersByRoleName" resultType="java.util.List">
+  	select u.id,u.user_name,u.email from SYS_USER u, SYS_ROLE r,SYS_USER_ROLE ur
+	where u.user_code=ur.user_code and r.role_code=ur.role_code
+	and r.role_name = #{roleName}
+  </select>
+   <select id="queryRoleCodeByuserName" resultType="String">
+  	select r.role_code from sys_user u,sys_user_role ur,sys_role r 
+  	where u.user_code = ur.user_code 
+  	and r.role_code = ur.role_code 
+  	and u.user_name = #{userName}
+	 
+  </select>
+  <delete id="deleteUserRoleByUserCode" parameterType="String">
+  	delete from SYS_USER_ROLE where user_code = #{code} 
+  </delete>
+  <insert id="saveUserRole" parameterType="UserRole">
+   insert into SYS_USER_ROLE (USER_CODE, ROLE_CODE,CREATE_DATE,STATUS)
+    values (#{userCode}, #{roleCode},sysdate(),#{status})
+  </insert>
+</mapper>

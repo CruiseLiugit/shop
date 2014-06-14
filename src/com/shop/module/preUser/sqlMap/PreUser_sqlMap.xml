@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.shop.module.preUser.dao.mapper.PreUserMapper">
+<!-- 角色 -->
+  <resultMap type="PreUser" id="PreUserMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="preUserCode" jdbcType="VARCHAR" property="preUserCode" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="create_date" jdbcType="DATE" property="createDate" />
+    <result column="status" jdbcType="VARCHAR" property="status" />      
+  </resultMap>
+  	<!-- 插入用户 -->
+  	<insert id="savePreUser" parameterType="PreUser">
+  		insert into phome_enewsuser(preUserCode,username,password,create_date,status)
+  		values(#{preUserCode,jdbcType=VARCHAR},#{username,jdbcType=VARCHAR},#{password,jdbcType=VARCHAR},sysdate(),#{status,jdbcType=VARCHAR})
+  	</insert>
+  	
+  	<!-- 更新用户 -->
+  	<update id="updatePreUser" parameterType="PreUser">
+  		update phome_enewsuser
+  		<set>
+  		<if test="username!=null">
+  			username=#{username,jdbcType=VARCHAR},
+  		</if>
+  		<if test="password!=null">
+  			password=#{password,jdbcType=VARCHAR},
+  		</if>
+  		<if test="status!=null">
+  			status=#{status,jdbcType=VARCHAR}
+  		</if>
+  		</set>
+  		where preUserCode=#{preUserCode,jdbcType=VARCHAR}
+  	</update>
+  	<!-- 删除用户 -->
+  	<delete id="deletePreUserByCode" parameterType="String">
+  		delete from phome_enewsuser where preUserCode=#{preUserCode,jdbcType=VARCHAR}
+  	</delete>
+  	<!-- 根据code查找用户 -->
+  	<select id="findPreUserByUserCode" parameterType="string" resultMap="PreUserMap">
+  		select * from phome_enewsuser where preUserCode=#{preUserCode,jdbcType=VARCHAR}
+  	</select>
+  	<!-- 查找一定条件下的用户 -->
+  	<select id="findPreUsers" parameterType="java.util.HashMap" resultMap="PreUserMap">
+  		select * from phome_enewsuser
+  		where 1=1
+  		<if test="username!=null and username!=''">and username  like concat('%',concat(#{username},'%'))</if>
+  		<if test="status!=null"> and status=#{status,jdbcType=VARCHAR}</if>
+  		order by create_date desc
+  	</select>
+  	
+  	<!-- 查找一定条件下的用户数量 -->
+  	<select id="findPreUsersCount" parameterType="java.util.HashMap" resultType="int">
+  		select count(1) from phome_enewsuser
+  		where 1=1
+  		<if test="username!=null and username!=''">and username  like concat('%',concat(#{username},'%'))</if>
+  		<if test="status!=null"> and status=#{status,jdbcType=VARCHAR}</if>
+  	</select>
+  	 
+  	<!-- 查找用户名是否 唯一-->
+  	<select id="checkUserName" parameterType="java.util.HashMap" resultType="int">
+  		select * from phome_enewsuser
+  		where 1=1
+  		<if test="username!=null">and username=username=#{username,jdbcType=VARCHAR}</if>
+  		<if test="status!=null"> and status=#{status,jdbcType=VARCHAR}</if>
+  		<if test="preUserCode!=null"> and preUserCode!=#{preUserCode,jdbcType=VARCHAR}</if>
+  	</select>
+</mapper>

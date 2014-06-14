@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+ 		<typeAlias alias="Authority"  type="com.shop.module.privilege.model.Authority" /> 
+ 		<typeAlias alias="Button"  type="com.shop.module.privilege.model.Button" /> 
+ 		<typeAlias alias="Menus"  type="com.shop.module.privilege.model.Menus" /> 
+ 		<typeAlias alias="SysUser"  type="com.shop.module.privilege.model.SysUser" /> 
+ 		<typeAlias alias="UserRole"  type="com.shop.module.privilege.model.UserRole" /> 
+ 		<typeAlias alias="Role"  type="com.shop.module.privilege.model.Role" />
+ 		<typeAlias alias="PreUser"  type="com.shop.module.preUser.model.PreUser" />
+ 		<typeAlias alias="Category"  type="com.shop.module.category.model.Category" />
+ 		<typeAlias alias="LfyProperty"  type="com.shop.module.property.model.LfyProperty" />
+ 		<typeAlias alias="LfyCategoryProperty"  type="com.shop.module.property.model.LfyCategoryProperty" />
+ 		<typeAlias alias="LfyPropertyValue"  type="com.shop.module.property.model.LfyPropertyValue" />
+	</typeAliases>
+
+	<plugins>
+		<!--
+			指定数据库分页方言Dialect,
+			其它方言:OracleDialect,SQLServerDialect,SybaseDialect,DB2Dialect,PostgreSQLDialect,MySQLDialect,DerbyDialect,HSQLDialect
+		-->
+		<plugin interceptor="cn.org.rapid_framework.ibatis3.plugin.OffsetLimitInterceptor">
+			<property name="dialectClass" value="cn.org.rapid_framework.jdbc.dialect.MySQLDialect" />
+		</plugin>
+	</plugins>
+</configuration>

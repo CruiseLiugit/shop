@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.shop.module.property.dao.mapper.LfyPropertyValueMapper">
+<!-- 角色 -->
+  <resultMap type="LfyPropertyValue" id="LfyPropertyValueMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="pv_code" jdbcType="VARCHAR" property="pvCode" />
+    <result column="categoryProperty_code" jdbcType="VARCHAR" property="categoryPropertyCode" />
+    <result column="PV_name" jdbcType="VARCHAR" property="pvName" />
+    <result column="show_name" jdbcType="VARCHAR" property="showName" />
+    <result column="PV_type" jdbcType="VARCHAR" property="pvtype" />   
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="PV_order" jdbcType="INTEGER" property="pvOrder" />
+  </resultMap>
+  	
+  	<!-- 插入属性 -->
+  	<insert id="insertPropertyValue" parameterType="LfyPropertyValue">
+  		insert into lfy_categorypropertyvalue(pv_code,categoryProperty_code,PV_name,show_name,PV_type,status,PV_order)
+  		values(#{pvCode,jdbcType=VARCHAR},#{categoryPropertyCode,jdbcType=VARCHAR},#{pvName,jdbcType=VARCHAR},
+  		#{showName,jdbcType=VARCHAR},#{pvtype,jdbcType=VARCHAR},#{status,jdbcType=VARCHAR},#{pvOrder,jdbcType=INTEGER})
+  	</insert>
+  	
+  	<!-- 更新属性 -->
+  	<update id="updatePropertyValue" parameterType="LfyPropertyValue">
+  		update lfy_categorypropertyvalue
+  		<set>
+  			<if test="categoryPropertyCode!=null">categoryProperty_code=#{categoryPropertyCode,jdbcType=VARCHAR},</if>
+  			<if test="pvName!=null">PV_name=#{pvName,jdbcType=VARCHAR},</if>
+  			<if test="showName!=null">show_name=#{showName,jdbcType=VARCHAR},</if>
+  			<if test="pvtype!=null">PV_type=#{pvtype,jdbcType=VARCHAR},</if>
+  			<if test="status!=null">status=#{status,jdbcType=VARCHAR},</if>
+  			<if test="pvOrder!=null">PV_order=#{pvOrder,jdbcType=INTEGER}</if>
+  		</set>
+  		where pv_code=#{pvCode,jdbcType=VARCHAR}
+  	</update>
+  	
+  	<!-- 删除属性 -->
+  	<delete id="deletePropertyValue" parameterType="String">
+  		delete from lfy_categorypropertyvalue where pv_code=#{pvCode,jdbcType=VARCHAR}
+  	</delete>
+  	
+  	 <!-- 逻辑删除指定外键(类目属性表id)所有记录 -->
+  	<update id="updateValuesByCategoryPropertyId" parameterType="string">
+	  	update lfy_categorypropertyvalue 
+	  	set status='0'
+	  	where categoryProperty_code=#{categoryPropertyCode}
+  </update>
+  
+  <!-- 查询指定id记录 -->
+  <select id="getPropertyValueByCode" parameterType="string" resultMap="LfyPropertyValueMap">
+  	select * from lfy_categorypropertyvalue t1 where pv_code=#{pvCode,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询一定条件的记录 -->
+  <select id="getPropertyValueList" parameterType="string" resultMap="LfyPropertyValueMap">
+  	select * from lfy_categorypropertyvalue t1 
+  	<where>
+		1=1
+		<if test="status!=null">and t1.status=#{status}</if>
+		<if test="categoryPropertyCode!=null">and categoryProperty_code=#{categoryPropertyCode}</if>
+		<if test="pvName!=null">and PV_name=#{pvName}</if>
+		<if test="showName!=null">and show_name=#{showName}</if>
+	</where>
+  	order by PV_order
+  </select>
+  
+  <!-- 查询某个类目的某个属性的属性值集合  -->
+  <select id="getAllPropertyValueListByCategoryProperty" parameterType="string" resultMap="LfyPropertyValueMap">
+  	select * from lfy_categorypropertyvalue t1 where categoryProperty_code=#{categoryPropertyCode} and status='1'  order by PV_order
+  </select>
+  
+  <!-- 查询某个类目某个属性的属性值是否存在  -->
+  <select id="getTicketsValueByNameAndCategoryproperty" parameterType="java.util.HashMap" resultMap="LfyPropertyValueMap">
+  	select * from lfy_categorypropertyvalue t1 where categoryProperty_code=#{categoryPropertyCode} and PV_name=#{pvName}  
+  	order by PV_order
+  </select>
+  
+  <!-- 查询一定条件记录的数目 -->
+  <select id="getPropertyValueList_count" parameterType="java.util.HashMap" resultType="int">
+  	select count(1) from lfy_categorypropertyvalue t1
+		<where>
+		1=1
+		<if test="status!=null">and t1.status=#{status}</if>
+		<if test="categoryPropertyCode!=null">and categoryProperty_code=#{categoryPropertyCode}</if>
+		<if test="pvName!=null">and PV_name=#{pvName}</if>
+		<if test="showName!=null">and show_name=#{showName}</if>
+		</where>
+  </select>
+  
+  <select id="getPropertyValueByCategoryCodeProperty" parameterType="java.util.HashMap" resultMap="LfyPropertyValueMap">
+	select *
+	from lfy_categorypropertyvalue tpv  left join  lfy_categoryproperty cp on tpv.categoryProperty_code=cp.categoryProperty_code left join lfy_property tp on tp.property_code=cp.property_code
+ 	where tp.property_code=#{propertyCode} and cp.category_code=#{categoryCode} and tp.status='1' and cp.status='1' and tpv.status='1' order by tpv.PV_order
+	
+	</select>
+	
+	
+</mapper>

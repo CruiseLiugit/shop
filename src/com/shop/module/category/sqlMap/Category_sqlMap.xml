@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.shop.module.category.dao.mapper.CategoryMapper">
+<!-- 角色 -->
+  <resultMap type="Category" id="CategoryMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="category_code" jdbcType="VARCHAR" property="categoryCode" />
+    <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+    <result column="category_pcode" jdbcType="VARCHAR" property="categoryPcode" />
+    <result column="create_date" jdbcType="DATE" property="createDate" />
+    <result column="create_opid" jdbcType="VARCHAR" property="createOpid" />   
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="categoryOrder" jdbcType="INTEGER" property="categoryOrder" />
+    <result column="show_name" jdbcType="VARCHAR" property="showName" />
+    <result column="categoryType" jdbcType="VARCHAR" property="categoryType" />   
+    <result column="category_rootcode" jdbcType="VARCHAR" property="categoryRootcode" /> 
+    <collection property="childGoodsgorys" column="category_code" select="getChildrenGoodsgory" />
+  </resultMap>
+  	
+  	<!-- 插入分类 -->
+  	<insert id="insertGoodsCategory" parameterType="Category">
+  	insert into 
+  	lfy_category(category_code,category_name,category_pcode,create_date,create_opid,status,categoryOrder,show_name,categoryType,category_rootcode)
+  	values(#{categoryCode,jdbcType=VARCHAR},#{categoryName,jdbcType=VARCHAR},#{categoryPcode,jdbcType=INTEGER},sysdate(),
+  	#{createOpid,jdbcType=VARCHAR},#{status,jdbcType=VARCHAR},#{categoryOrder,jdbcType=INTEGER},#{showName,jdbcType=VARCHAR},
+  	#{categoryType,jdbcType=VARCHAR},#{categoryRootcode,jdbcType=VARCHAR})
+  	</insert>
+  	
+  	<!-- 删除分类-->
+  	<delete id="deleteGoodsCategory" parameterType="java.lang.String">
+		delete from lfy_category where category_code=#{categoryCode}
+	</delete>
+	
+	<!--更新分类  -->
+	<update id="updateGoodsCategory" parameterType="Category">
+		update lfy_category
+		<set>
+		<if test="categoryCode!=null">category_code=#{categoryCode,jdbcType=VARCHAR},</if>
+		<if test="categoryName!=null">category_name=#{categoryName,jdbcType=VARCHAR},</if>
+		<if test="categoryPcode!=null">category_pcode=#{categoryPcode,jdbcType=VARCHAR},</if>
+		<if test="createOpid!=null">create_opid=#{createOpid,jdbcType=VARCHAR},</if>
+		<if test="status!=null">status=#{status,jdbcType=VARCHAR},</if>
+		<if test="categoryOrder!=null">categoryOrder=#{categoryOrder,jdbcType=INTEGER},</if>
+		<if test="showName!=null">show_name=#{showName,jdbcType=VARCHAR},</if>
+		<if test="categoryRootcode!=null">category_rootcode=#{categoryRootcode,jdbcType=VARCHAR}</if>
+		</set>
+		where category_code=#{categoryCode}
+	</update>
+	
+	<!-- 根据分类code查询分类 -->
+	<select id="getGoodsCategoryById" resultMap="CategoryMap" parameterType="java.lang.String">
+    	select * from lfy_category t1 where t1.category_code=#{categoryCode}
+    </select>
+    
+    <!-- 查询分类集合 -->
+    <select id="getGoodsCategoryList" resultMap="CategoryMap" parameterType="java.util.HashMap">
+		select * from lfy_category t1
+		<where>
+		1=1
+		<if test="status!=null">and t1.status=#{status}</if>
+		<if test="categoryName!=null">and t1.category_name=#{categoryName}</if>
+		<if test="categoryPcode!=null">and t1.category_pcode=#{categoryPcode}</if>
+		<if test="categoryCode!=null">and t1.category_code=#{categoryCode}</if>
+		<if test="categoryType!=null">and t1.categoryType=#{categoryType}</if>
+		</where>
+		order by categoryOrder
+	</select>
+	
+	<!-- 查询分类集合长度 -->
+	<select id="getGoodsCategoryList_count" resultType="int" parameterType="java.util.HashMap">
+		select count(1) from lfy_category t1
+		<where>
+		1=1
+		<if test="status!=null">and t1.status=#{status}</if>
+		<if test="categoryName!=null">and t1.category_name=#{categoryName}</if>
+		<if test="categoryPcode!=null">and t1.category_pcode=#{categoryPcode}</if>
+		<if test="categoryCode!=null">and t1.category_code=#{categoryCode}</if>
+		<if test="categoryType!=null">and t1.categoryType=#{categoryType}</if>
+		</where>
+	</select>
+	
+	<!-- 查询子节点  -->
+	<select id="getChildrenGoodsgory" parameterType="java.lang.String" resultMap="CategoryMap">
+		select * from lfy_category t1 where t1.category_pcode=#{categoryPcode} and t1.status='1' order by categoryOrder
+	</select>
+</mapper>

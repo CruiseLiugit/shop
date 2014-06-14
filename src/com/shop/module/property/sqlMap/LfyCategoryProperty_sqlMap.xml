@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.shop.module.property.dao.mapper.LfyCategoryPropertyMapper">
+<!-- 角色 -->
+  <resultMap type="LfyCategoryProperty" id="LfyCategoryPropertyMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="categoryProperty_code" jdbcType="VARCHAR" property="categoryPropertyCode" />
+    <result column="category_code" jdbcType="VARCHAR" property="categoryCode" />
+    <result column="property_code" jdbcType="VARCHAR" property="propertyCode" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_date" jdbcType="DATE" property="createDate" />   
+    <result column="create_opid" jdbcType="VARCHAR" property="createOpid" />
+  </resultMap>
+  	
+  <!-- 插入记录 -->
+  <insert id="insertCategoryProperty" parameterType="LfyCategoryProperty">
+  	insert into lfy_categoryproperty(categoryProperty_code,category_code,property_code,status,create_date,create_opid)
+  	values(#{categoryPropertyCode,jdbcType=VARCHAR},#{categoryCode,jdbcType=VARCHAR},#{propertyCode,jdbcType=VARCHAR},
+  	#{status,jdbcType=VARCHAR},sysdate(),#{createOpid,jdbcType=VARCHAR})
+  </insert>
+  
+  <!-- 删除记录 -->
+  <delete id="deleteCategoryProperty" parameterType="String">
+  	delete from lfy_categoryproperty where categoryProperty_code=#{categoryPropertyCode,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 修改记录 -->
+  <update id="updateCategoryProperty" parameterType="LfyCategoryProperty">
+  	update lfy_categoryproperty
+  	<set>
+  		<if test="categoryCode!=null">category_code=#{categoryCode,jdbcType=VARCHAR},</if>
+  		<if test="propertyCode!=null">property_code=#{propertyCode,jdbcType=VARCHAR},</if>
+  		<if test="status!=null">status=#{status,jdbcType=VARCHAR}</if>
+  	</set>
+  	where categoryProperty_code=#{categoryPropertyCode,jdbcType=VARCHAR}
+  </update>
+  <update id="updateAllPropertyByCategoryCode" parameterType="String">
+  	update lfy_categoryproperty set status='0' where category_code=#{categoryCode,jdbcType=VARCHAR}
+  </update>
+  <!-- 查询某个属性 -->
+  <select id="getCategoryPropertybyCode" parameterType="String" resultMap="LfyCategoryPropertyMap">
+  	select * from lfy_categoryproperty where categoryProperty_code=#{categoryPropertyCode,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 通过类目和属性查找到一条记录 -->
+  <select id="getCategoryProperty" parameterType="java.util.HashMap"  resultMap="LfyCategoryPropertyMap">
+  	select * from lfy_categoryproperty where category_code=#{categoryCode,jdbcType=VARCHAR} and property_code=#{propertyCode,jdbcType=VARCHAR}
+  	and status="1"
+  </select>
+  
+  <select id="getCategoryPropertyList" parameterType="java.util.HashMap"  resultMap="LfyCategoryPropertyMap">
+  	select * from lfy_categoryproperty
+  	<where>
+  	1=1
+  	<if test="status!=null">and status=#{status,jdbcType=VARCHAR}</if>
+  	<if test="categoryCode!=null">and category_code=#{categoryCode,jdbcType=VARCHAR}</if>
+  	<if test="propertyCode!=null">and property_code=#{propertyCode,jdbcType=VARCHAR}</if>
+  	</where>
+  </select>
+  
+  <select id="getCategoryPropertyList_count" parameterType="java.util.HashMap"  resultType="int">
+  	select count(1) from lfy_categoryproperty
+  	<where>
+  	1=1
+  	<if test="status!=null">and status=#{status,jdbcType=VARCHAR}</if>
+  	<if test="categoryCode!=null">and category_code=#{categoryCode,jdbcType=VARCHAR}</if>
+  	<if test="propertyCode!=null">and property_code=#{propertyCode,jdbcType=VARCHAR}</if>
+  	</where>
+  </select>
+  
+  
+</mapper>

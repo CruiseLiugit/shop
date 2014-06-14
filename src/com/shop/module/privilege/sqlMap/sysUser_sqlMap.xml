@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+<mapper namespace="com.shop.module.privilege.dao.mapper.SysUserMapper">
+	<resultMap type="SysUser" id="SysUserResultMap">
+			<result column="ID" jdbcType="BIGINT" property="id" />
+			<result column="USER_CODE" jdbcType="VARCHAR" property="userCode" />
+			<result column="LOGIN_NAME" jdbcType="VARCHAR" property="loginName" />
+			<result column="LOG_PWD" jdbcType="VARCHAR" property="logPwd" />
+			<result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+			<result column="EMAIL" jdbcType="VARCHAR" property="email" />
+			<result column="USER_PHONE" jdbcType="VARCHAR" property="userPhone" />
+			<result column="USER_TYPE" jdbcType="VARCHAR" property="userType" />
+			<result column="SELLER_CODE" jdbcType="VARCHAR" property="sellerCode" />
+			<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+			<result column="STATUS" jdbcType="VARCHAR" property="status" />		
+	</resultMap>
+	
+	<!--根据登陆名和密码查找用户是否存在 -->
+	<select id="findSysUser" parameterType="java.util.HashMap" resultMap="SysUserResultMap">
+		select * from SYS_USER where LOGIN_NAME=#{loginName} and LOG_PWD=#{loginPwd} and STATUS='1'
+	</select>
+	
+	<!-- 根据loginName查询系统用户 -->
+	<select id="findSysUserByLoginName" parameterType="java.util.HashMap" resultMap="SysUserResultMap">
+		select * from SYS_USER 
+		where 1=1 
+		<if test="loginName!=null and loginName!=''">and LOGIN_NAME like concat('%',concat(#{loginName},'%'))</if>
+		and STATUS = '1'
+	</select>
+	
+	<select id="findSysUserByLoginNameCount" parameterType="java.util.HashMap" resultType="int">
+		select count(1) from SYS_USER 
+		where 1=1 
+		<if test="loginName!=null and loginName!=''">and LOGIN_NAME like concat('%',concat(#{loginName},'%'))</if>
+		and STATUS = '1'
+	</select>
+	
+	<select id="checkLoginName" parameterType="java.util.HashMap" resultMap="SysUserResultMap">
+		select * from SYS_USER 
+		where LOGIN_NAME =#{loginName}
+		and STATUS = '1'
+	</select>
+	
+	<!--根据usercode修改登陆密码 -->
+	<update id="updateLoginPwd" parameterType="java.util.HashMap">
+		update SYS_USER set LOG_PWD=#{newLoginPwd} where USER_CODE=#{userCode} and STATUS='1'
+	</update>
+	
+	<!-- 分页查询系统用户 -->
+	<select id="getAllSysUserList" resultMap="SysUserResultMap">
+	    select * from SYS_USER 	where status='1'
+	</select>
+	
+	<!-- 新增系统用户 -->
+	<insert id="saveSysUser" parameterType="SysUser" >
+	    insert into SYS_USER 
+	    (user_code,login_name,log_pwd,user_name,email,user_phone,user_type,seller_code,create_date,status)
+	    values
+	    (#{userCode},#{loginName},#{logPwd},#{userName},#{email},#{userPhone jdbcType=VARCHAR},#{userType jdbcType=VARCHAR},#{sellerCode jdbcType=VARCHAR},sysdate(),#{status})
+    </insert>
+    
+    <!-- 修改系统用户 -->
+    <update id="updateSysUserById" parameterType="SysUser">
+    	update SYS_USER 
+    	<set>
+    	 <if test="loginName !=null">
+    	 login_name = #{loginName},
+    	 </if>
+    	 <if test="logPwd !=null">
+    	log_pwd = #{logPwd},
+    	 </if>
+    	 <if test="userName !=null">
+    	 user_name = #{userName},
+    	 </if> 
+    	 <if test="email !=null">
+    	 email = #{email},
+    	 </if>
+    	 <if test="userPhone !=null">
+    	user_phone = #{userPhone},
+    	 </if>
+    	 <if test="userType !=null">
+    	 user_type = #{userType},
+    	 </if>
+    	 <if test="sellerCode !=null">
+    	 seller_code = #{sellerCode},
+    	 </if> 
+    	<if test="createDate !=null">
+    	 create_date = #{createDate},
+    	 </if>
+    	 <if test="status !=null">
+    	 status = #{status}
+    	 </if> 
+    	 </set>
+    	 where user_code = #{userCode}
+    </update>
+    
+    <!-- 删除系统用户 -->
+    <delete id="deleteSysUserById" parameterType="String">
+        delete from SYS_USER where user_code = #{sysUserId}
+    </delete>
+    
+    <!-- 根据id查询系统用户 -->
+    <select id="getSysUserById" parameterType="String" resultMap="SysUserResultMap">
+    	select * from SYS_USER where user_code=#{id} and STATUS='1'
+    </select>
+    
+    <!-- 获取系统用户总记录数 -->
+    <select id="getTotalCount" resultType="int">
+    	select count(1) from SYS_USER where STATUS='1'
+    </select>
+</mapper>

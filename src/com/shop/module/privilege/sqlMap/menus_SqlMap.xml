@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+<!-- 菜单sqlMap -->
+<mapper namespace="com.shop.module.privilege.dao.mapper.MenusMapper">
+
+  <resultMap type="Menus" id="MenusMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />   
+    <result column="MENU_CODE" jdbcType="VARCHAR" property="menuCode" />
+    <result column="MENU_NAME" jdbcType="VARCHAR" property="menuName" />
+    <result column="LEVELID" jdbcType="VARCHAR" property="levelId" />
+    <result column="MENU_URL" jdbcType="VARCHAR" property="menuUrl" />
+    <result column="FMENU_CODE" jdbcType="VARCHAR" property="fmenuCode" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+  </resultMap>
+  <!--查询当前用户拥有的菜单 -->
+  <select id="findUserMenus" resultMap="MenusMap" parameterType="java.util.HashMap">
+  	select b.*
+  	from (select distinct a.Id,
+                        m.MENU_CODE,
+                        m.ENGNAME,
+                        m.MENU_NAME,
+                        m.FMENU_CODE,
+                        m.MENU_URL,
+                        m.LEVELID,
+			m.SORTVALUE
+          from sys_user_role         ur,
+               sys_roles_authorities ra,
+              sys_authorities       a,
+               sys_menus             m
+         WHERE ur.USER_CODE = '8532aa11-08ae-444d-bb72-801f4f9997b6'
+           AND ur.ROLE_CODE = ra.ROLE_CODE
+           AND ra.AUTH_CODE = a.AUTH_CODE
+           AND a.IS_MENU = '1'
+           AND a.MENU_CODE = m.MENU_CODE) b
+		ORDER  BY b.SORTVALUE 
+  </select> 
+  <!-- 插入菜单 -->
+	<insert id="insertMenus" parameterType="Menus">
+		insert into SYS_MENUS
+		(MENU_CODE,MENU_NAME,LEVELID,FMENU_CODE,ENGNAME,MENU_URL,CREATE_DATE,STATUS)
+		 values
+		(#{menuCode},#{menuName},#{levelId},#{fmenuCode},#{engName},#{menuUrl},sysdate(),#{status})
+	</insert>
+  <!-- 更新菜单 -->
+	<update id="updateMenus" parameterType="Menus">
+		update SYS_MENUS
+		<set>
+			<if test="menuName !=null">menu_name = #{menuName},</if>
+			<if test="levelId !=null">levelid = #{levelId},</if>
+			<if test="fmenuCode !=null">fmenu_code= #{fmenuCode},</if>
+			<if test="engName !=null">engname = #{engName},</if>
+			<if test="menuUrl !=null">menu_url = #{menuUrl},</if>
+			<if test="createDate !=null">
+				CREATE_DATE= #{createDate},
+			</if>
+			<if test="status !=null">status = #{status}</if>
+		</set>
+		where menu_code = #{menuCode}
+	</update>
+    <!-- 删除菜单 -->
+	<delete id="deleteMenusById" parameterType="java.lang.Integer">
+		delete from SYS_MENUS where id = #{id}
+	</delete>
+   <!-- 通过菜单code查询菜单 -->
+	<select id="getMenusByCode" resultMap="MenusMap" parameterType="java.lang.String">
+		select * from SYS_MENUS where id = #{id} and status='1'
+	</select>
+    <!-- 通过菜单name查询菜单 -->
+	<select id="getMenusByMenusName" resultMap="MenusMap" parameterType="java.util.HashMap">
+		select * from SYS_MENUS where MENU_NAME  like '%${menuName}%' and status='1'
+	</select>
+   <!-- 查询所有菜单列表 -->
+	<select id="getMenusList" parameterType="java.util.HashMap" resultMap="MenusMap">
+		select * from SYS_MENUS where status='1' order by levelid						
+	</select>
+   <!-- 统计菜单数量 -->
+	<select id="getMenusCount" parameterType="java.util.HashMap" resultType="int">
+		select count(1) from SYS_MENUS where status='1'						
+	</select>
+	<!-- 根据条件统计菜单数量 -->
+    <select id="getMenusCountByMenusName" parameterType="java.util.HashMap" resultType="int">
+		select count(1) from SYS_MENUS  where MENU_NAME like '%${menuName}%' and status='1'						
+	</select>
+  <!-- 获取拥有的按钮 -->
+	<select id="getCheckedModelId" parameterType="String" resultType="String">
+      select md.id as value  
+      from SYS_MENUS m,
+      SYS_AUTHORITIES a,
+      SYS_MODEL md 
+      where  m.menu_code = a.menu_code 
+      and a.model_code = md.model_code 
+      and m.id =#{id,jdbcType=VARCHAR}
+      and a.status='1'
+      and m.status='1'
+	</select>
+	<!-- 通过菜单levelId获取菜单 -->
+	<select id="getMenusByLevelId" resultMap="MenusMap" parameterType="java.lang.String">
+		select * from SYS_MENUS where levelid = #{levelId} and status='1'
+	</select>
+	
+    <!-- 获取所有的按钮 -->
+	<select id="getAllButtons" resultType="java.util.HashMap" >
+		select * from SYS_MODEL where status ='1'
+	</select>
+	<!-- 获取权限 编码-->	
+	<select id="getAuthorityCodeByMenuCode" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select auth_code from SYS_AUTHORITIES where menu_code=#{menuCode}
+	</select>
+	<!-- 删除角色权限表 -->
+    <delete id="deleteRoleAuthByauthCode" parameterType="java.util.HashMap">
+  	delete from SYS_ROLES_AUTHORITIES where auth_code = #{authCode} 
+   </delete>
+   <!-- 删除权限表 -->
+   <delete id="deleteAuthByMenuCode" parameterType="java.util.HashMap">  
+    delete from sys_authorities  where menu_code = #{menuCode}  
+    </delete>
+    <!-- 插入权限表 -->
+   <insert id="insertAuthority" parameterType="java.util.HashMap">
+			insert into sys_authorities (AUTH_CODE,IS_MENU,MENU_CODE,MODEL_CODE,CREATE_DATE,STATUS)  
+			values(#{authCode,jdbcType=VARCHAR},#{isMenu,jdbcType=VARCHAR},
+			#{menuCode,jdbcType=VARCHAR},#{modelCode,jdbcType=VARCHAR},sysdate(),'1'
+			)		
+	</insert>
+	<!-- 通过userCode查询roleCode -->
+	<select id="getRoleCodeByUserCode" resultType="String" parameterType="java.util.HashMap">
+		select role_code from sys_user_role  where user_code =#{userCode}
+	</select>
+	<!-- 插入角色权限表 -->
+	   <insert id="insertRoleAuth" parameterType="java.util.HashMap">
+      insert into SYS_ROLES_AUTHORITIES (ROLE_CODE, AUTH_CODE,CREATE_DATE,STATUS)
+    values (#{roleCode}, #{authCode},sysdate(),'1')
+  </insert>
+  <!-- 获取已经拥有的按钮 -->
+  	<select id="getCheckedButtonId" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+      select md.model_code as value  
+      from SYS_MENUS m,
+      SYS_AUTHORITIES a,
+      sys_model md 
+      where  m.menu_code = a.menu_code 
+      and a.model_code = md.model_code 
+      and m.menu_code =#{id}
+      and a.status='1'
+      and m.status='1'
+	</select>
+ 
+    <!--获取所有Auth menu:用于菜单按钮树 -->
+  	<select id="getAllAuthMenus" resultType="java.util.HashMap">
+   	select m.MENU_CODE,m.MENU_NAME,m.FMENU_CODE,au.auth_code 
+   	from SYS_MENUS m left join sys_authorities au on m.menu_code=au.menu_code 
+   	where m.STATUS='1' and au.is_menu='1' and au.status='1' ORDER BY m.LEVELID
+	</select>
+	 <!--获取所有Auth Button:用于菜单按钮树 -->
+	<select id="getAllAuthButtons" resultType="java.util.HashMap">
+	select pov_m.model_code,pov_m.model_name,au.MENU_CODE,au.auth_code
+	from sys_authorities au  left join sys_model pov_m on pov_m.model_code=au.model_code 
+	where pov_m.status='1' and au.is_menu='0' and au.status='1'
+	</select>
+   <!--获取用户拥有的菜单toolbar  -->
+   	<select id="getUserButtons" resultType="java.util.Map" parameterType="java.util.Map"> 
+      select distinct a.ID, m.MODEL_NAME, m.MODEL_TITLE, m.IMGNAME, m.CREATE_DATE
+          from sys_user_role         ur,
+               sys_roles_authorities ra,
+               sys_authorities       a,
+               sys_model             m
+         WHERE ur.USER_CODE = #{userCode}
+         AND ur.ROLE_CODE = ra.ROLE_CODE
+         AND ra.AUTH_CODE = a.AUTH_CODE
+         AND a.IS_MENU = '0'
+         AND a.Model_CODE = m.MODEL_CODE
+         AND a.MENU_CODE = #{menuCode}
+         order by m.SORTVALUE 
+   </select>
+   
+   
+</mapper>

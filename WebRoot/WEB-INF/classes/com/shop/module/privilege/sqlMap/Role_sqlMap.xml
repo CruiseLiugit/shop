@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.shop.module.privilege.dao.mapper.RoleMapper">
+<!-- 角色 -->
+  <resultMap type="Role" id="RoleMap">
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="ROLE_CODE" jdbcType="VARCHAR" property="roleCode" />
+    <result column="ROLE_NAME" jdbcType="VARCHAR" property="roleName" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="IS_SYSTEM" jdbcType="VARCHAR" property="isSystem" />
+    <result column="TYPE" jdbcType="VARCHAR" property="type" />
+    <result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />      
+  </resultMap>
+  	<!-- 统计角色数量 -->
+	<select id="getRoleTotalCount"  resultType="int">
+		select count(*) from SYS_ROLE where status ='1'
+	</select>
+  	<!-- 查询角色列表 -->
+	<select id="queryAllRoleList"  resultMap="RoleMap">
+		select * from sys_role where status ='1'
+	</select>
+    <!-- 根据id查询角色 -->
+	<select id="getRoleById" parameterType="String" resultMap="RoleMap">
+		select * from SYS_ROLE where id = #{id}
+	</select>
+	<!-- 插入角色 -->
+	<insert id="insertRole" parameterType="Role">	   
+	    insert into SYS_ROLE (ROLE_CODE,ROLE_NAME,DESCRIPTION,IS_SYSTEM,TYPE,CREATE_DATE,STATUS)
+	       values
+	           (#{roleCode},#{roleName},#{description},#{isSystem},#{type},sysdate(),#{status})
+    </insert>
+    <!-- 更新角色 -->
+    <update id="updateRole" parameterType="Role">
+    update SYS_ROLE
+     	<set>
+    	 <if test="roleName !=null">
+    	 ROLE_NAME = #{roleName},
+    	 </if>
+    	 <if test="description !=null">
+    	 DESCRIPTION = #{description},
+    	 </if>
+    	 <if test="type !=null">
+    	 TYPE = #{type},
+    	 </if>
+    	 <if test="createDate !=null">
+    	 CREATE_DATE = #{createDate},
+    	 </if>
+    	 <if test="status !=null">
+    	 STATUS = #{status}
+    	 </if>
+    	 </set>
+    	 where ROLE_CODE = #{roleCode}
+    </update>
+    <!-- 删除角色 -->	 
+   <delete id="deleteRole" parameterType="Role">
+    delete from SYS_ROLE where ID = #{id}
+  </delete>
+  
+  <!-- 查询所有角色 -->
+	<select id="getAllRoles"  resultMap="RoleMap">
+		select * from sys_role where status ='1'
+	</select>
+	
+	  <!-- 根据角色名称查询角色 -->
+	<select id="getRoleByRoleName"  parameterType ="java.util.HashMap" resultMap="RoleMap">
+		select * from sys_role where ROLE_NAME like '%${roleName}%' and  status ='1'
+	</select>
+	<!-- 根据角色名称模糊统计角色数量 -->
+	<select id="getRolesTotalCountByRoleName"  resultType="int">
+		select count(*) from SYS_ROLE where ROLE_NAME like '%${roleName}%' and  status ='1'
+	</select>
+	
+	  	<!-- 验证用户名是否存在 -->
+	<select id="validateRoleName"  resultType="int">
+		select count(*) from SYS_ROLE where ROLE_NAME = #{roleName} and status ='1'
+	</select>
+	
+	<!-- 根据用户id查询用户关联的角色 -->
+	<select id="getRolesByUserId" parameterType="String" resultMap="RoleMap">
+		select * from sys_role r,SYS_USER_ROLE ur,SYS_USER u 
+		where r. ROLE_CODE = ur.ROLE_CODE and ur.USER_CODE = u.USER_CODE
+		and u.USER_CODE = #{sysUserId}
+	</select>
+	
+	<!-- 根据roleIds查询角色列表 -->
+	<select id="getRoleByRoleIds" parameterType="java.util.HashMap" resultMap="RoleMap">
+		SELECT * FROM SYS_ROLE r WHERE r.ROLE_CODE in 
+		<foreach collection="list" index="index" item="i" separator="," open="(" close=")" >
+ 			#{i}
+ 		</foreach>
+	</select>
+	
+   <!-- 删除角色权限 -->
+   <delete id="deleteRoleAuthByRoleCode" parameterType="java.util.HashMap">
+  	 delete from SYS_ROLES_AUTHORITIES where role_code = #{roleCode} 
+  </delete>
+  <!-- 根据角色id查询角色拥有的权限 -->
+  	<select id="getCheckedAuthIds" parameterType="java.util.HashMap" resultType="java.util.HashMap">	
+		select auth_code 
+        from sys_authorities t
+        where t.auth_code in  
+       (select ba.auth_code
+          from sys_roles_authorities ba,sys_authorities bm
+         where  role_code = #{roleCode})        
+	</select>
+</mapper>

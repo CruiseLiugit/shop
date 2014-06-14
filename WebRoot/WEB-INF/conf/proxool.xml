@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<proxool-config>
+	 
+	<proxool>
+		<alias>proxool-shop</alias>
+		<driver-url>
+		 	jdbc:mysql://127.0.0.1:3306/shop 	
+        </driver-url>
+		<driver-class>com.mysql.jdbc.Driver</driver-class>
+		<driver-properties>
+			<property name="user" value="root" />
+			<property name="password" value="1234" />
+		</driver-properties>
+		<maximum-connection-count>50</maximum-connection-count>
+		
+		<minimum-connection-count>5</minimum-connection-count>
+		
+		<simultaneous-build-throttle>15</simultaneous-build-throttle>
+		
+		<maximum-active-time>360000</maximum-active-time>
+		
+	    <prototype-count>2</prototype-count>
+
+		<maximum-connection-lifetime>14400000</maximum-connection-lifetime>
+		
+		<test-before-use>true</test-before-use>
+		
+		<test-after-use>false</test-after-use>
+		
+		<house-keeping-test-sql>select SYSDATE FROM DUAL</house-keeping-test-sql>
+		
+		<house-keeping-sleep-time>30000</house-keeping-sleep-time>
+		
+		<trace>false</trace>
+		
+		<statistics>1m,1h,1d</statistics>
+		<statistics-log-level>DEBUG</statistics-log-level>
+	</proxool>
+</proxool-config>
